@@ -3,8 +3,10 @@ package requests
 import VStats
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import structures.Match
 import structures.Player
 import java.io.*
@@ -17,11 +19,11 @@ object ExpandingAccountIDs {
     init
     {
     	playerFolder.mkdir()
-        queuedIDS.add("ZXsH9z7aN9DvRpFf4blWQ9iJTtQvtXkXjP4-WyIFJSRZbtiS1ULd7Pz9ZpFp8-QTfS8xm-wg52rxrg")
-        queuedIDS.addAll(playerFolder.list()?.toList() ?: listOf())
+        queuedIDS.addAll(playerFolder.list()?.toList()?.shuffled() ?: listOf())
     }
 
     operator fun invoke() {
+        VStats.requests.second += min(5, queuedIDS.size-1) * 2
         for (i in 0..min(5, queuedIDS.size-1))
         {
             val puuid = queuedIDS.removeAt(0)
