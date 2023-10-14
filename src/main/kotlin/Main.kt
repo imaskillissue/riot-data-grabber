@@ -8,6 +8,8 @@ fun main(args: Array<String>) {
     {
         VStats.makeRequest()
         Thread.sleep(15 * Time.SECOND)
+        if (readlnOrNull() == "exit")
+            break
     }
     println("VStats Exited")
 }
