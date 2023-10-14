@@ -24,12 +24,12 @@ object VStats
 	}
 	fun makeRequest()
 	{
-		if (requests.first + Time.MINUTE * 2 < System.currentTimeMillis())
+		if (requests.first + Time.MINUTE * 1 < System.currentTimeMillis())
 		{
 			requests.first = System.currentTimeMillis()
 			requests.second = 0
 		}
-		if (requests.second > 85)
+		if (requests.second > 20)
 			return
 		ExpandingAccountIDs()
 	}

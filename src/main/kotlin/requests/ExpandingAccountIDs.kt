@@ -20,6 +20,8 @@ object ExpandingAccountIDs {
     {
     	playerFolder.mkdir()
         queuedIDS.addAll(playerFolder.list()?.toList()?.shuffled() ?: listOf())
+        while (queuedIDS.size > 100)
+            queuedIDS.removeAt(0)
     }
 
     operator fun invoke() {
@@ -35,11 +37,6 @@ object ExpandingAccountIDs {
                 catch (e: Exception)
                 {
                     println(e.message)
-                    if (e.message == "Error: 429")
-                    {
-                        queuedIDS.add(puuid)
-                        return@launch
-                    }
                     queuedIDS.add(puuid)
                 }
             }
@@ -47,21 +44,21 @@ object ExpandingAccountIDs {
     }
 
     private suspend fun makeRequest(puuid: String) {
+        println("Requesting $puuid")
         val r1 = VStats.client.request(
-            "https://europe.api.riotgames" +
-                    ".com/lol/match/v5/matches/by-puuid/$puuid/ids?start=0&count=5"
+            "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/$puuid/ids?start=0&count=5"
         ) {
             header("X-Riot-Token", VStats.key)
         }
         if (r1.status.value != 200)
-            throw Exception("Error: ${r1.status.value}")
+            throw Exception("Error on Request 1: ${r1.status.value}")
         val matchIds = r1.body<Array<String>>()
         for (matchId in matchIds) {
             val r2 = VStats.client.request("https://europe.api.riotgames.com/lol/match/v5/matches/$matchId") {
                 header("X-Riot-Token", VStats.key)
             }
             if (r2.status.value != 200)
-                throw Exception("Error: ${r2.status.value}")
+                throw Exception("Error on Request 2: ${r2.status.value}")
             val match = r2.body<Match>()
             for (participant in match.info.participants)
             {
